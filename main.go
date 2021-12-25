@@ -12,10 +12,39 @@ import (
 )
 
 type ReportListItem struct {
-	Own bool `json: "own"`
-	Name string `json: "name"`
-	Id string `json: "id"`
-	Type string `json: "$type"`
+	Own bool	`json:"own"`
+	Name string	`json:"name"`
+	Id string	`json:"id"`
+	Type string	`json:"$type"`
+}
+
+type TotalDuration struct {
+	Value int32
+}
+
+type ReportLine struct {
+	Description string
+	IssueId string
+	TotalDuration TotalDuration
+}
+
+type LinkedUser struct {
+	VisibleName string
+	RingId string
+}
+type ReportGroupMeta struct {
+	LinkedUser LinkedUser
+}
+type ReportGroupItem struct {
+	Lines []ReportLine
+	Meta ReportGroupMeta
+}
+type ReportData struct {
+	Groups []ReportGroupItem
+}
+type Report struct {
+	Data ReportData
+	Name string
 }
 
 var url string
@@ -83,7 +112,22 @@ func getReport(id string) {
         fmt.Println("Error while reading the response bytes:", err)
     }
 
-	fmt.Printf(string(body))
+	var report Report
+	json.Unmarshal(body, &report)
+
+	for _, group := range report.Data.Groups {
+		if group.Meta.LinkedUser.VisibleName == "Дударек Илья" {
+			formatReport(group)
+			break
+		}
+	}
+}
+
+func formatReport(group ReportGroupItem) {
+	fmt.Printf("Отчет для %s \n", group.Meta.LinkedUser.VisibleName)
+	for _, line := range group.Lines {
+		fmt.Printf("Задача: %s %s ----------------- %d \n", line.IssueId, line.Description, line.TotalDuration.Value)
+	}
 }
 
 func getDateReport() string {
