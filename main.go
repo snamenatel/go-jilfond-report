@@ -6,10 +6,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/joho/godotenv"
 )
+
+const LINE_LENGHT = 110
 
 type ReportListItem struct {
 	Own bool	`json:"own"`
@@ -19,7 +24,7 @@ type ReportListItem struct {
 }
 
 type TotalDuration struct {
-	Value int32
+	Value int
 }
 
 type ReportLine struct {
@@ -115,18 +120,63 @@ func getReport(id string) {
 	var report Report
 	json.Unmarshal(body, &report)
 
+	var repotContent []string
 	for _, group := range report.Data.Groups {
 		if group.Meta.LinkedUser.VisibleName == "Дударек Илья" {
-			formatReport(group)
+			repotContent = append(repotContent, formatReport(group))
 			break
 		}
 	}
+
+	writeToFile(repotContent)
 }
 
-func formatReport(group ReportGroupItem) {
+func formatReport(group ReportGroupItem) string {
 	fmt.Printf("Отчет для %s \n", group.Meta.LinkedUser.VisibleName)
+	var rowList []string
 	for _, line := range group.Lines {
-		fmt.Printf("Задача: %s %s ----------------- %d \n", line.IssueId, line.Description, line.TotalDuration.Value)
+		title := line.IssueId + ": " + line.Description
+		duration := strconv.Itoa(line.TotalDuration.Value)
+		if LINE_LENGHT - utf8.RuneCountInString(title) - utf8.RuneCountInString(duration) <= 0 {
+			title = title[: LINE_LENGHT - utf8.RuneCountInString(duration) - 4] + "..."
+		}
+
+		dashLine := strings.Repeat("_", LINE_LENGHT - utf8.RuneCountInString(title) - utf8.RuneCountInString(duration))
+		rowList = append(rowList, fmt.Sprintf("%s%s%s", title, dashLine, duration))
+
+	}
+	return strings.Join(rowList, "\n")
+}
+
+func createDir(path string) {
+	_, err := os.Stat(path)
+    if err != nil {
+        e := os.Mkdir(path, os.ModeDir)
+		if e != nil {
+			fmt.Println("Ошибка при создании директории: ", err)
+			os.Exit(0)
+		}
+    }
+}
+
+func createFile(fileName string) {
+	f, err := os.Create(fileName)
+	if err != nil {
+		fmt.Println("Ошибка при создании файла: ", err)
+		os.Exit(0)
+	}
+	defer f.Close()
+}
+
+func writeToFile(contentList []string) {
+	createDir("./reports")
+	fileName := fmt.Sprintf("./reports/%s.txt", reportDate)
+	createFile(fileName)
+	
+	err := os.WriteFile(fileName, []byte(strings.Join(contentList, "\n")), 0644)
+	if err != nil {
+		fmt.Println("Ошибка при записи файла: ", err)
+		os.Exit(0)
 	}
 }
 
