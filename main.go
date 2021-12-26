@@ -12,14 +12,6 @@ import (
 )
 
 const LINE_LENGHT = 110
-
-type ReportListItem struct {
-	Own bool	`json:"own"`
-	Name string	`json:"name"`
-	Id string	`json:"id"`
-	Type string	`json:"$type"`
-}
-
 var url string
 var token string
 var reportDate string
@@ -47,6 +39,12 @@ func main() {
 }
 
 
+func checkError(err error, text string) {
+	if err != nil {
+		panic(text)
+	}
+}
+
 
 
 func formatReport(group ReportGroupItem) string {
@@ -70,19 +68,13 @@ func createDir(path string) {
 	_, err := os.Stat(path)
     if err != nil {
         e := os.Mkdir(path, os.ModeDir)
-		if e != nil {
-			fmt.Println("Ошибка при создании директории: ", err)
-			os.Exit(0)
-		}
+		checkError(e, "Ошибка при создании директории")
     }
 }
 
 func createFile(fileName string) {
 	f, err := os.Create(fileName)
-	if err != nil {
-		fmt.Println("Ошибка при создании файла: ", err)
-		os.Exit(0)
-	}
+	checkError(err, "Ошибка при создании файла")
 	defer f.Close()
 }
 
@@ -92,10 +84,7 @@ func writeToFile(contentList []string) {
 	createFile(fileName)
 	
 	err := os.WriteFile(fileName, []byte(strings.Join(contentList, "\n")), 0644)
-	if err != nil {
-		fmt.Println("Ошибка при записи файла: ", err)
-		os.Exit(0)
-	}
+	checkError(err, "Ошибка при записи файла")
 }
 
 func getDateReport() string {

@@ -2,10 +2,16 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 )
+
+type ReportListItem struct {
+	Own bool	`json:"own"`
+	Name string	`json:"name"`
+	Id string	`json:"id"`
+	Type string	`json:"$type"`
+}
 
 type ReportLine struct {
 	Description   string
@@ -39,16 +45,11 @@ func GetReportsList() []ReportListItem {
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println("Ошибка при получении списка отчетов" + "\n")
-	}
+	checkError(err, "Ошибка при получении списка отчетов")
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println("Error while reading the response bytes:", err)
-	}
-
+	checkError(err, "Error while reading the response bytes")
 	var reporstList []ReportListItem
 	json.Unmarshal(body, &reporstList)
 
@@ -62,15 +63,11 @@ func GetReport(id string) {
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	if err != nil {
-		fmt.Println("Ошибка при получении отчета" + "\n")
-    }
+	checkError(err, "Ошибка при получении отчета")
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-        fmt.Println("Error while reading the response bytes:", err)
-    }
+	checkError(err, "Error while reading the response bytes")
 
 	var report Report
 	json.Unmarshal(body, &report)
