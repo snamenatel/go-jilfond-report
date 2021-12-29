@@ -12,6 +12,7 @@ import (
 )
 
 const LINE_LENGHT = 110
+const COST = 700
 var url string
 var token string
 var reportDate string
@@ -45,8 +46,6 @@ func checkError(err error, text string) {
 	}
 }
 
-
-
 func formatReport(group ReportGroupItem) string {
 	fmt.Printf("Отчет для %s \n", group.Meta.LinkedUser.VisibleName)
 	var rowList []string
@@ -62,6 +61,26 @@ func formatReport(group ReportGroupItem) string {
 
 	}
 	return strings.Join(rowList, "\n")
+}
+
+func formatCompleatedReport(group ReportGroupItem) string {
+	var rowList []string
+	lengthLeft := 80
+	lengthRight := LINE_LENGHT - lengthLeft
+	for _, line := range group.Lines {
+		title := line.IssueId + ": " + line.Description
+		estimate := minutesToString(line.Estimation.Value)
+		cost := minutesToCost(line.Estimation.Value)
+		
+		if lengthLeft - utf8.RuneCountInString(title) <= 0 {
+			title = title[: lengthLeft - utf8.RuneCountInString(title) - 4] + "..."
+		}
+		dashLineLeft := strings.Repeat("_", lengthLeft - utf8.RuneCountInString(title))
+		dashLineRight := strings.Repeat("_", lengthRight - utf8.RuneCountInString(estimate) - utf8.RuneCountInString(cost))
+		rowList = append(rowList, fmt.Sprintf("%s%s%s%s%s __ %d", title, dashLineLeft, estimate, dashLineRight, cost, line.Estimation.Value))
+	}
+
+	return fmt.Sprintf("Затрачено в ______ \n%s", strings.Join(rowList, "\n"))
 }
 
 func createDir(path string) {

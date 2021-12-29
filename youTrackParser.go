@@ -19,6 +19,9 @@ type ReportLine struct {
 	TotalDuration struct {
 		Value int
 	}
+	Estimation struct {
+		Value int
+	}
 }
 
 type ReportGroupMeta struct {
@@ -75,7 +78,7 @@ func GetReport(id string) {
 	var repotContent []string
 	for _, group := range report.Data.Groups {
 		if group.Meta.LinkedUser.VisibleName == "Дударек Илья" {
-			repotContent = append(repotContent, formatReport(group))
+			repotContent = append(repotContent, formatCompleatedReport(group))
 			break
 		}
 	}
