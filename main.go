@@ -67,7 +67,9 @@ func formatCompleatedReport(group ReportGroupItem) string {
 	var rowList []string
 	lengthLeft := 80
 	lengthRight := LINE_LENGHT - lengthLeft
+	sumMinutes := 0
 	for _, line := range group.Lines {
+		sumMinutes += line.Estimation.Value
 		title := line.IssueId + ": " + line.Description
 		estimate := minutesToString(line.Estimation.Value)
 		cost := minutesToCost(line.Estimation.Value)
@@ -75,12 +77,20 @@ func formatCompleatedReport(group ReportGroupItem) string {
 		if lengthLeft - utf8.RuneCountInString(title) <= 0 {
 			title = title[: lengthLeft - utf8.RuneCountInString(title) - 4] + "..."
 		}
-		dashLineLeft := strings.Repeat("_", lengthLeft - utf8.RuneCountInString(title))
-		dashLineRight := strings.Repeat("_", lengthRight - utf8.RuneCountInString(estimate) - utf8.RuneCountInString(cost))
-		rowList = append(rowList, fmt.Sprintf("%s%s%s%s%s __ %d", title, dashLineLeft, estimate, dashLineRight, cost, line.Estimation.Value))
+		dashLineLeft := strings.Repeat(".", lengthLeft - utf8.RuneCountInString(title))
+		dashLineRight := strings.Repeat(".", lengthRight - utf8.RuneCountInString(estimate) - utf8.RuneCountInString(cost))
+		rowList = append(rowList, fmt.Sprintf("%s%s%s%s%s", title, dashLineLeft, estimate, dashLineRight, cost))
 	}
+	totalMin := minutesToString(group.Estimation.Value)
+	totalCost := minutesToCost(group.Estimation.Value)
+	dashLineLeft := strings.Repeat(".", lengthLeft - utf8.RuneCountInString("Итого:"))
+	dashLineRight := strings.Repeat(".", lengthRight - utf8.RuneCountInString(totalMin) - utf8.RuneCountInString(totalCost))
+	rowList = append(rowList, fmt.Sprintf("Итого:%s%s%s%s",dashLineLeft, totalMin, dashLineRight, totalCost))
 
-	return fmt.Sprintf("Затрачено в ______ \n%s", strings.Join(rowList, "\n"))
+	return fmt.Sprintf("<b>Затрачено в %s %s</b>\n<pre>\n%s \n</pre>",
+		getMonthTranslate(reportDate),
+		strings.Split(reportDate, "-")[0],
+		strings.Join(rowList, "\n"))
 }
 
 func createDir(path string) {

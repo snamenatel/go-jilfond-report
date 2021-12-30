@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Time struct {
 	days int
@@ -38,4 +41,35 @@ func minutesToString(min int) string {
 	}
 
 	return result
+}
+
+func getMonthTranslate(date string) string {
+	var str string
+	switch strings.Split(date, "-")[1] {
+	case "01":
+		str = "янв."
+	case "02":
+		str = "фев."
+	case "03":
+		str = "мар."
+	case "04":
+		str = "апр."
+	case "05":
+		str = "май."
+	case "06":
+		str = "июнь."
+	case "07":
+		str = "июль."
+	case "08":
+		str = "авг."
+	case "09":
+		str = "сент."
+	case "10":
+		str = "окт."
+	case "11":
+		str = "нояб."
+	case "12":
+		str = "дек."
+	}
+	return str
 }

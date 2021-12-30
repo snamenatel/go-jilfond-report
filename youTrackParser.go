@@ -33,6 +33,9 @@ type ReportGroupMeta struct {
 type ReportGroupItem struct {
 	Lines []ReportLine
 	Meta  ReportGroupMeta
+	Estimation struct {
+		Value int
+	}
 }
 
 type Report struct {
