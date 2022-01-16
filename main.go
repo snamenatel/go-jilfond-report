@@ -87,7 +87,7 @@ func formatCompleatedReport(group ReportGroupItem) string {
 	dashLineRight := strings.Repeat(".", lengthRight - utf8.RuneCountInString(totalMin) - utf8.RuneCountInString(totalCost))
 	rowList = append(rowList, fmt.Sprintf("Итого:%s%s%s%s",dashLineLeft, totalMin, dashLineRight, totalCost))
 
-	return fmt.Sprintf("<b>Затрачено в %s %s</b>\n<pre>\n%s \n</pre>",
+	return fmt.Sprintf("<b>Внедрено в %s %s</b>\n<pre>\n%s \n</pre>",
 		getMonthTranslate(reportDate),
 		strings.Split(reportDate, "-")[0],
 		strings.Join(rowList, "\n"))
