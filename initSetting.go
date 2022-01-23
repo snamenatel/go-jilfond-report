@@ -11,6 +11,7 @@ import (
 
 func getDateReport() string {
 	var currentMonthScrool int
+	var result string
 	if len(os.Args) < 2 {
 		prompt := promptui.Select{
 			Label: "Select report year",
@@ -34,9 +35,13 @@ func getDateReport() string {
 		checkError(err, "Prompt failed")
 
 		t, _ := time.Parse("2006-January-02", fmt.Sprintf("%s-%s-01", year, month))
-		return t.Format("2006-01")
+		result = t.Format("2006-01")
+	} else {
+		result = os.Args[1]
+
 	}
-	return os.Args[1]
+	fmt.Printf("Поиск отчета за период %s \n", result)
+	return result;
 }
 
 func getSelectYearItems() []string {

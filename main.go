@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"strconv"
+	"path/filepath"
 	"strings"
 	"unicode/utf8"
 
@@ -27,17 +27,40 @@ func init() {
 
 func main() {
 	reportDate = getDateReport()
-	fmt.Println("Поиск отчета за период", reportDate)
 
-	var curentReportId string
+	reportIds := make(map[string]string)
 	for _, report := range GetReportsList() {
 		if report.Name == "Внедрено " + reportDate {
-			curentReportId = report.Id
+			reportIds["Implemented"] = report.Id
+		}
+		if report.Name == "Отработано " + reportDate {
+			reportIds["Spent"] = report.Id
 		}
 	}
-	
-	fmt.Println("Найден отчет " + curentReportId)
-	GetReport(curentReportId)
+	if len(reportIds) == 0 {
+		fmt.Println("Отчеты за выбранный период не найдены")
+		return
+	}
+
+	fmt.Printf("Найдены отчеты: \n - по внедренным задачам - %s/reports/time/%s \n - по отработанному времени - %s/reports/time/%s\n\r", url, reportIds["Implemented"], url, reportIds["Spent"])	
+	reports := make(map[string]Report)
+	for k, v := range reportIds {
+		reports[k] = GetReport(v)
+	}
+	var repotContent []string
+	for _, report := range reports {
+		for _, group := range report.Data.Groups {
+			if group.Meta.LinkedUser.VisibleName == "Дударек Илья" {
+				if strings.HasPrefix(report.Name, "Внедрено") {
+					repotContent = append(repotContent, formatCompleatedReport(group))
+				} else {
+					repotContent = append(repotContent, formatSpentReport(group))
+				}
+			}
+		}
+	}
+
+	writeToFile(repotContent)
 }
 
 
@@ -47,21 +70,24 @@ func checkError(err error, text string) {
 	}
 }
 
-func formatReport(group ReportGroupItem) string {
-	fmt.Printf("Отчет для %s \n", group.Meta.LinkedUser.VisibleName)
+func formatSpentReport(group ReportGroupItem) string {
 	var rowList []string
 	for _, line := range group.Lines {
 		title := line.IssueId + ": " + line.Description
-		duration := strconv.Itoa(line.TotalDuration.Value)
+		duration := minutesToString(line.TotalDuration.Value)
 		if LINE_LENGHT - utf8.RuneCountInString(title) - utf8.RuneCountInString(duration) <= 0 {
 			title = title[: LINE_LENGHT - utf8.RuneCountInString(duration) - 4] + "..."
 		}
 
-		dashLine := strings.Repeat("_", LINE_LENGHT - utf8.RuneCountInString(title) - utf8.RuneCountInString(duration))
+		dashLine := strings.Repeat(".", LINE_LENGHT - utf8.RuneCountInString(title) - utf8.RuneCountInString(duration))
 		rowList = append(rowList, fmt.Sprintf("%s%s%s", title, dashLine, duration))
 
 	}
-	return strings.Join(rowList, "\n")
+
+	return fmt.Sprintf("<b>Отработано в %s %s</b>\n<pre>\n%s \n</pre>",
+		getMonthTranslate(reportDate),
+		strings.Split(reportDate, "-")[0],
+		strings.Join(rowList, "\n"))
 }
 
 func formatCompleatedReport(group ReportGroupItem) string {
@@ -113,7 +139,10 @@ func writeToFile(contentList []string) {
 	fileName := fmt.Sprintf("./reports/%s.txt", reportDate)
 	createFile(fileName)
 	
-	err := os.WriteFile(fileName, []byte(strings.Join(contentList, "\n")), 0644)
+	err := os.WriteFile(fileName, []byte(strings.Join(contentList, "\n\r\n\r")), 0644)
+	filePath, _ := filepath.Abs(fileName)
+	fmt.Printf("Отчеты сформированы %s\n", filePath)
+
 	checkError(err, "Ошибка при записи файла")
 }
 
