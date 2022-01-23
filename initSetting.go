@@ -3,12 +3,14 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/manifoldco/promptui"
 )
 
 func getDateReport() string {
+	var currentMonthScrool int
 	if len(os.Args) < 2 {
 		prompt := promptui.Select{
 			Label: "Select report year",
@@ -17,11 +19,18 @@ func getDateReport() string {
 		_, year, err := prompt.Run()
 		checkError(err, "Prompt failed")
 
+		currentMonth, _ := strconv.Atoi(time.Now().Format("01"))
+		currentMonth--
+		if currentMonth > 5 {
+			currentMonthScrool = currentMonth
+		} else {
+			currentMonthScrool = 0
+		}
 		prompt = promptui.Select{
 			Label: "Select report month",
 			Items: getSelectMonthItems(),
 		}
-		_, month, err := prompt.Run()
+		_, month, err := prompt.RunCursorAt(currentMonth, currentMonthScrool)
 		checkError(err, "Prompt failed")
 
 		t, _ := time.Parse("2006-January-02", fmt.Sprintf("%s-%s-01", year, month))
