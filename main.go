@@ -5,7 +5,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 	"unicode/utf8"
 
 	"github.com/joho/godotenv"
@@ -23,11 +22,13 @@ func init() {
     }
 	token = "Bearer " + os.Getenv("TOKEN")
 	url = os.Getenv("URL")
-	reportDate = getDateReport()
-	fmt.Println("Поиск отчета за период", reportDate)
+
 }
 
 func main() {
+	reportDate = getDateReport()
+	fmt.Println("Поиск отчета за период", reportDate)
+
 	var curentReportId string
 	for _, report := range GetReportsList() {
 		if report.Name == "Внедрено " + reportDate {
@@ -116,9 +117,3 @@ func writeToFile(contentList []string) {
 	checkError(err, "Ошибка при записи файла")
 }
 
-func getDateReport() string {
-	if len(os.Args) < 2 {
-		return time.Now().Format("2006-01")
-	}
-	return os.Args[1]
-}
