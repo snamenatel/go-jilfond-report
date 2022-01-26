@@ -5,7 +5,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/joho/godotenv"
 )
 
@@ -13,7 +15,7 @@ const LINE_LENGHT = 110
 const COST = 700
 var url string
 var token string
-var reportDate string
+var reportDate time.Time
 
 func init() {
 	if err := godotenv.Load(); err != nil {
@@ -29,10 +31,10 @@ func main() {
 
 	reportIds := make(map[string]string)
 	for _, report := range GetReportsList() {
-		if report.Name == "Внедрено " + reportDate {
+		if report.Name == "Внедрено " + reportDate.Format("2006-01") {
 			reportIds["Implemented"] = report.Id
 		}
-		if report.Name == "Отработано " + reportDate {
+		if report.Name == "Отработано " + reportDate.Format("2006-01") {
 			reportIds["Spent"] = report.Id
 		}
 	}
@@ -60,8 +62,29 @@ func main() {
 	}
 
 	writeToFile(repotContent)
-}
 
+	if isNeedFutureTasks() {
+		dateNextSprint := reportDate.AddDate(0, 1, 0).Format("06-01")
+		fmt.Printf("Поиск задач будет осуществляться в спринте %s \n", dateNextSprint)
+		taskList := GetTaskList(GetTaskIDList(GetCurrentSprintID(dateNextSprint)))
+		
+		planTasks := []string{}
+		prompt := &survey.MultiSelect{
+			Message: "Выберите задачи для добавления их в план на следующий месяц",
+			Options: taskList,
+		}
+		survey.AskOne(prompt, &planTasks)
+
+		priorityTasks := []string{}
+		prompt = &survey.MultiSelect{
+			Message: "Выберите приоритетные задачи",
+			Options: planTasks,
+		}
+		survey.AskOne(prompt, &priorityTasks)
+		appendToFile(planTasks, priorityTasks)
+		
+	}
+}
 
 func checkError(err error, text string) {
 	if err != nil {
@@ -71,7 +94,7 @@ func checkError(err error, text string) {
 
 func writeToFile(contentList []string) {
 	createDir("./reports")
-	fileName := fmt.Sprintf("./reports/%s.txt", reportDate)
+	fileName := fmt.Sprintf("./reports/%s.txt", reportDate.Format("2006-01"))
 	createFile(fileName)
 	
 	err := os.WriteFile(fileName, []byte(strings.Join(contentList, "\n\r\n\r")), 0644)
@@ -79,6 +102,19 @@ func writeToFile(contentList []string) {
 	fmt.Printf("Отчеты сформированы %s\n", filePath)
 
 	checkError(err, "Ошибка при записи файла")
+}
+
+func appendToFile(planTasks, priorityTasks []string) {
+	plan, priority := futureTaskFormat(planTasks, priorityTasks)
+	fileName := fmt.Sprintf("./reports/%s.txt", reportDate.Format("2006-01"))
+
+	f, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY, 0600)
+	checkError(err, "Ошибка при записи файла1")
+	defer f.Close()
+
+	fmt.Println(plan)
+	_, err = f.WriteString(fmt.Sprintf("\n\r\n\r%s\n\r\n\r%s\n\r", plan, priority))
+	checkError(err, "Ошибка при записи файла2")
 }
 
 func createDir(path string) {

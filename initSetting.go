@@ -9,11 +9,12 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-func getDateReport() string {
+func getDateReport() time.Time {
 	var currentMonthScrool int
-	var result string
+	var result time.Time
 	if len(os.Args) < 2 {
 		prompt := promptui.Select{
+			HideHelp: false,
 			Label: "Select report year",
 			Items: getSelectYearItems(),
 		}
@@ -28,6 +29,7 @@ func getDateReport() string {
 			currentMonthScrool = 0
 		}
 		prompt = promptui.Select{
+			HideHelp: false,
 			Label: "Select report month",
 			Items: getSelectMonthItems(),
 		}
@@ -35,10 +37,10 @@ func getDateReport() string {
 		checkError(err, "Prompt failed")
 
 		t, _ := time.Parse("2006-January-02", fmt.Sprintf("%s-%s-01", year, month))
-		result = t.Format("2006-01")
+		result = t
 	} else {
-		result = os.Args[1]
-
+		t, _ := time.Parse("2006-01", os.Args[1])
+		result = t
 	}
 	fmt.Printf("Поиск отчета за период %s \n", result)
 	return result;
@@ -58,4 +60,16 @@ func getSelectMonthItems() []string {
 		res = append(res, time.Date(2021, time.Month(i), 1, 0, 0, 0, 0, time.UTC).Format("January"))
 	}
 	return res; 
+}
+
+func isNeedFutureTasks() bool {
+	prompt := promptui.Select{
+		HideSelected: true,
+		HideHelp: false,
+		Label: "Вы хотите получить список заданий будущего спринта",
+		Items: []string{"Да", "Нет"},
+	}
+	_, answer, err := prompt.Run()
+	checkError(err, "Prompt failed")
+	return answer == "Да"
 }

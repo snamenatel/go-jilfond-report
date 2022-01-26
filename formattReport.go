@@ -21,8 +21,8 @@ func formatSpentReport(group ReportGroupItem) string {
 	}
 
 	return fmt.Sprintf("<b>Отработано в %s %s</b>\n<pre>\n%s \n</pre>",
-		getMonthTranslate(reportDate),
-		strings.Split(reportDate, "-")[0],
+		getMonthTranslate(reportDate.Format("2006-01")),
+		strings.Split(reportDate.Format("2006-01"), "-")[0],
 		strings.Join(rowList, "\n"))
 }
 
@@ -51,7 +51,19 @@ func formatCompleatedReport(group ReportGroupItem) string {
 	rowList = append(rowList, fmt.Sprintf("Итого:%s%s%s%s", dashLineLeft, totalMin, dashLineRight, totalCost))
 
 	return fmt.Sprintf("<b>Внедрено в %s %s</b>\n<pre>\n%s \n</pre>",
-		getMonthTranslate(reportDate),
-		strings.Split(reportDate, "-")[0],
+		getMonthTranslate(reportDate.Format("2006-01")),
+		strings.Split(reportDate.Format("2006-01"), "-")[0],
 		strings.Join(rowList, "\n"))
+}
+
+func futureTaskFormat(planTasks, priorityTasks []string) (string, string) {
+	plan := fmt.Sprintf("<b>Плановые задачи в %s %s</b>\n<pre>\n%s \n</pre>", 
+		getMonthTranslate(reportDate.AddDate(0, 1, 0).Format("2006-01")),
+		strings.Split(reportDate.AddDate(0, 1, 0).Format("2006-01"), "-")[0],
+		strings.Join(planTasks, "\n"))
+	priority := fmt.Sprintf("<b>Приоритетные задачи в %s %s</b>\n<pre>\n%s \n</pre>", 
+		getMonthTranslate(reportDate.AddDate(0, 1, 0).Format("2006-01")),
+		strings.Split(reportDate.AddDate(0, 1, 0).Format("2006-01"), "-")[0],
+		strings.Join(priorityTasks, "\n"))
+	return plan, priority
 }
