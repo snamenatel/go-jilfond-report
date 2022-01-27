@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"unicode/utf8"
 )
@@ -60,7 +61,7 @@ func futureTaskFormat(planTasks, priorityTasks []string) (string, string) {
 	plan := fmt.Sprintf("<b>Плановые задачи в %s %s</b>\n<pre>\n%s \n</pre>", 
 		getMonthTranslate(reportDate.AddDate(0, 1, 0).Format("2006-01")),
 		strings.Split(reportDate.AddDate(0, 1, 0).Format("2006-01"), "-")[0],
-		strings.Join(planTasks, "\n"))
+		strings.Join(sort.StringSlice(planTasks), "\n"))
 	priority := fmt.Sprintf("<b>Приоритетные задачи в %s %s</b>\n<pre>\n%s \n</pre>", 
 		getMonthTranslate(reportDate.AddDate(0, 1, 0).Format("2006-01")),
 		strings.Split(reportDate.AddDate(0, 1, 0).Format("2006-01"), "-")[0],

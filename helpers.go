@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"sort"
 	"strings"
 )
 
@@ -72,4 +74,24 @@ func getMonthTranslate(date string) string {
 		str = "дек."
 	}
 	return str
+}
+
+func contains(s []string, searchterm string) bool {
+    i := sort.SearchStrings(s, searchterm)
+    return i < len(s) && s[i] == searchterm
+}
+
+
+func createDir(path string) {
+	_, err := os.Stat(path)
+    if err != nil {
+        e := os.Mkdir(path, os.ModeDir)
+		checkError(e, "Ошибка при создании директории")
+    }
+}
+
+func createFile(fileName string) {
+	f, err := os.Create(fileName)
+	checkError(err, "Ошибка при создании файла")
+	defer f.Close()
 }

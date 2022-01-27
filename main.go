@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -81,8 +82,9 @@ func main() {
 			Options: planTasks,
 		}
 		survey.AskOne(prompt, &priorityTasks)
+		sort.Strings(planTasks)
+		sort.Strings(priorityTasks)
 		appendToFile(planTasks, priorityTasks)
-		
 	}
 }
 
@@ -105,7 +107,7 @@ func writeToFile(contentList []string) {
 }
 
 func appendToFile(planTasks, priorityTasks []string) {
-	plan, priority := futureTaskFormat(planTasks, priorityTasks)
+	plan, priority := futureTaskFormat(filter(planTasks, priorityTasks), priorityTasks)
 	fileName := fmt.Sprintf("./reports/%s.txt", reportDate.Format("2006-01"))
 
 	f, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY, 0600)
@@ -117,16 +119,12 @@ func appendToFile(planTasks, priorityTasks []string) {
 	checkError(err, "Ошибка при записи файла2")
 }
 
-func createDir(path string) {
-	_, err := os.Stat(path)
-    if err != nil {
-        e := os.Mkdir(path, os.ModeDir)
-		checkError(e, "Ошибка при создании директории")
-    }
-}
-
-func createFile(fileName string) {
-	f, err := os.Create(fileName)
-	checkError(err, "Ошибка при создании файла")
-	defer f.Close()
+func filter(origin, target []string) []string {
+	filtered := []string{}
+	for _, str := range origin {
+		if !contains(target, str) {
+			filtered = append(filtered, str)
+		}
+	}
+	return filtered
 }
