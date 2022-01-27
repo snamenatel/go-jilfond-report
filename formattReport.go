@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 	"unicode/utf8"
 )
@@ -58,13 +57,29 @@ func formatCompleatedReport(group ReportGroupItem) string {
 }
 
 func futureTaskFormat(planTasks, priorityTasks []string) (string, string) {
+
+
+
 	plan := fmt.Sprintf("<b>Плановые задачи в %s %s</b>\n<pre>\n%s \n</pre>", 
 		getMonthTranslate(reportDate.AddDate(0, 1, 0).Format("2006-01")),
 		strings.Split(reportDate.AddDate(0, 1, 0).Format("2006-01"), "-")[0],
-		strings.Join(sort.StringSlice(planTasks), "\n"))
+		strings.Join(futureTaskLine(planTasks), "\n"))
 	priority := fmt.Sprintf("<b>Приоритетные задачи в %s %s</b>\n<pre>\n%s \n</pre>", 
 		getMonthTranslate(reportDate.AddDate(0, 1, 0).Format("2006-01")),
 		strings.Split(reportDate.AddDate(0, 1, 0).Format("2006-01"), "-")[0],
-		strings.Join(priorityTasks, "\n"))
+		strings.Join(futureTaskLine(priorityTasks), "\n"))
 	return plan, priority
 }
+
+func futureTaskLine(list []string) []string {
+	var result []string
+	for _, line := range list {
+		if LINE_LENGHT - utf8.RuneCountInString(line) <= 0 {
+			line = line[:LINE_LENGHT-4] + "..."
+		}
+
+		dashLine := strings.Repeat(".", LINE_LENGHT-utf8.RuneCountInString(line) - 1)
+		result = append(result, fmt.Sprintf("%s%s", line, dashLine))
+	}
+	return result
+} 
