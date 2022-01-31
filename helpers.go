@@ -14,7 +14,8 @@ type Time struct {
 }
 
 func minutesToCost(min int) string {
-	return fmt.Sprintf("%d руб.", int(float32(min) / 60 * COST))
+	fmt.Println(min, float32(min / 60) * float32(costPerHour))
+	return fmt.Sprintf("%f руб.", float32(min / 60) * float32(costPerHour))
 }
 
 func divMod(a int, b int) int {
@@ -94,4 +95,11 @@ func createFile(fileName string) {
 	f, err := os.Create(fileName)
 	checkError(err, "Ошибка при создании файла")
 	defer f.Close()
+}
+
+
+func checkError(err error, text string) {
+	if err != nil {
+		panic(text)
+	}
 }

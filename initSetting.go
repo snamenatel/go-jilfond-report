@@ -15,11 +15,11 @@ func getDateReport() time.Time {
 	if len(os.Args) < 2 {
 		prompt := promptui.Select{
 			HideHelp: false,
-			Label: "Select report year",
+			Label: "Год",
 			Items: getSelectYearItems(),
 		}
 		_, year, err := prompt.Run()
-		checkError(err, "Prompt failed")
+		checkError(err, "Ошибка")
 
 		currentMonth, _ := strconv.Atoi(time.Now().Format("01"))
 		currentMonth--
@@ -30,11 +30,11 @@ func getDateReport() time.Time {
 		}
 		prompt = promptui.Select{
 			HideHelp: false,
-			Label: "Select report month",
+			Label: "Месяц",
 			Items: getSelectMonthItems(),
 		}
 		_, month, err := prompt.RunCursorAt(currentMonth, currentMonthScrool)
-		checkError(err, "Prompt failed")
+		checkError(err, "Ошибка")
 
 		t, _ := time.Parse("2006-January-02", fmt.Sprintf("%s-%s-01", year, month))
 		result = t
@@ -70,6 +70,6 @@ func isNeedFutureTasks() bool {
 		Items: []string{"Да", "Нет"},
 	}
 	_, answer, err := prompt.Run()
-	checkError(err, "Prompt failed")
+	checkError(err, "Ошибка")
 	return answer == "Да"
 }

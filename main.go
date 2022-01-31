@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 )
 
 const LINE_LENGHT = 110
-const COST = 700
+var costPerHour int
 var url string
 var token string
 var reportDate time.Time
@@ -24,10 +25,12 @@ func init() {
     }
 	token = "Bearer " + os.Getenv("TOKEN")
 	url = os.Getenv("URL")
-
+	t, _ := strconv.Atoi(os.Getenv("COST"))
+	costPerHour = t
 }
 
 func main() {
+	fmt.Println(costPerHour, )
 	reportDate = getDateReport()
 
 	reportIds := make(map[string]string)
@@ -73,9 +76,10 @@ func main() {
 		prompt := &survey.MultiSelect{
 			Message: "Выберите задачи для добавления их в план на следующий месяц",
 			Options: taskList,
+			Help: " ",
 		}
 		survey.AskOne(prompt, &planTasks)
-
+		
 		priorityTasks := []string{}
 		prompt = &survey.MultiSelect{
 			Message: "Выберите приоритетные задачи",
@@ -85,12 +89,6 @@ func main() {
 		sort.Strings(planTasks)
 		sort.Strings(priorityTasks)
 		appendToFile(planTasks, priorityTasks)
-	}
-}
-
-func checkError(err error, text string) {
-	if err != nil {
-		panic(text)
 	}
 }
 
@@ -111,12 +109,11 @@ func appendToFile(planTasks, priorityTasks []string) {
 	fileName := fmt.Sprintf("./reports/%s.txt", reportDate.Format("2006-01"))
 
 	f, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY, 0600)
-	checkError(err, "Ошибка при записи файла1")
+	checkError(err, "Ошибка при записи файла")
 	defer f.Close()
 
-	fmt.Println(plan)
 	_, err = f.WriteString(fmt.Sprintf("\n\r\n\r%s\n\r\n\r%s\n\r", plan, priority))
-	checkError(err, "Ошибка при записи файла2")
+	checkError(err, "Ошибка при записи файла")
 }
 
 func filter(origin, target []string) []string {

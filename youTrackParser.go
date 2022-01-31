@@ -99,7 +99,7 @@ func GetReport(id string) Report {
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	checkError(err, "Ошибка при получении отчета")
+	checkError(err, "Ошибка при получении данных")
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -117,7 +117,7 @@ func GetCurrentSprintID(date string) string {
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	checkError(err, "Ошибка при получении отчета")
+	checkError(err, "Ошибка при получении данных")
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -143,7 +143,7 @@ func GetTaskIDList(spritnId string) []Issue {
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	checkError(err, "Ошибка при получении отчета")
+	checkError(err, "Ошибка при получении данных")
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -181,7 +181,7 @@ func GetTaskList(taskIds []Issue) []string {
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
-	checkError(err, "Ошибка при получении отчета")
+	checkError(err, "Ошибка при получении данных")
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
