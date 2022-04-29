@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"sort"
 	"strings"
@@ -14,8 +15,7 @@ type Time struct {
 }
 
 func minutesToCost(min int) string {
-	fmt.Println(min, float32(min / 60) * float32(costPerHour))
-	return fmt.Sprintf("%f руб.", float32(min / 60) * float32(costPerHour))
+	return fmt.Sprintf("%g руб.", math.Ceil(float64(min) / 60.0 * float64(costPerHour) * 10) / 10)
 }
 
 func divMod(a int, b int) int {
